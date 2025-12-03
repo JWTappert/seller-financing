@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Become The Bank Calculator</title>
+</head>
+<body>
+
+<!-- This is the mount point -->
+<div id="become-the-bank-calculator"></div>
+
+<style>
+.btb-calculator {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.btb-calculator * {
+  box-sizing: border-box;
+}
+
+.btb-calculator__card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.btb-calculator__header {
+  margin-bottom: 32px;
+}
+
+.btb-calculator__title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.btb-calculator__subtitle {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+}
+
+.btb-calculator__step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.btb-calculator__step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  transition: background 0.3s;
+}
+
+.btb-calculator__step-dot--active {
+  background: #4a90e2;
+}
+
+.btb-calculator__step-dot--completed {
+  background: #52c41a;
+}
+
+.btb-calculator__form-group {
+  margin-bottom: 20px;
+}
+
+.btb-calculator__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.btb-calculator__helper {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.btb-calculator__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.3s;
+}
+
+.btb-calculator__input:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+.btb-calculator__input--error {
+  border-color: #ff4d4f;
+}
+
+.btb-calculator__select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 15px;
+  background: white;
+  cursor: pointer;
+}
+
+.btb-calculator__radio-group {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.btb-calculator__radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.btb-calculator__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+}
+
+.btb-calculator__toggle:hover {
+  background: #e8e8e8;
+}
+
+.btb-calculator__advanced-fields {
+  margin-top: 20px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.btb-calculator__warning {
+  padding: 12px 16px;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 6px;
+  color: #d46b08;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.btb-calculator__error {
+  padding: 12px 16px;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  color: #cf1322;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.btb-calculator__buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btb-calculator__button {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btb-calculator__button--primary {
+  background: #4a90e2;
+  color: white;
+}
+
+.btb-calculator__button--primary:hover {
+  background: #3a7bc8;
+}
+
+.btb-calculator__button--secondary {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #d9d9d9;
+}
+
+.btb-calculator__button--secondary:hover {
+  background: #e8e8e8;
+}
+
+.btb-calculator__comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.btb-calculator__comparison-card {
+  background: #fafafa;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.btb-calculator__comparison-card--highlight {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.btb-calculator__comparison-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.btb-calculator__comparison-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.btb-calculator__comparison-row:last-child {
+  border-bottom: none;
+  padding-top: 12px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.btb-calculator__comparison-label {
+  color: #666;
+}
+
+.btb-calculator__comparison-value {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.btb-calculator__highlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.btb-calculator__highlight-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.btb-calculator__highlight-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.btb-calculator__details {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.btb-calculator__details-toggle {
+  width: 100%;
+  padding: 12px 16px;
+  background: #fafafa;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btb-calculator__details-toggle:hover {
+  background: #f0f0f0;
+}
+
+.btb-calculator__details-content {
+  padding: 16px;
+  background: white;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.btb-calculator__details-content p {
+  margin: 0 0 12px 0;
+}
+
+.btb-calculator__details-content p:last-child {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .btb-calculator__card {
+    padding: 20px;
+  }
+
+  .btb-calculator__title {
+    font-size: 24px;
+  }
+
+  .btb-calculator__comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .btb-calculator__buttons {
+    flex-direction: column-reverse;
+  }
+
+  .btb-calculator__highlight-value {
+    font-size: 28px;
+  }
+}
+</style>
+
+<script>
+(function() {
+  'use strict';
+
+  // State object
+  const state = {
+    currentStep: 1,
+    showAdvanced: false,
+
+    // Step 1
+    targetSalePrice: '',
+    mortgagePayoff: '',
+    sellingCostsPct: '6',
+    taxRateGain: '15',
+    taxBasis: '',
+    depreciationTaken: '',
+    sfSellingCostsPct: '2',
+
+    // Step 2
+    buyerMaxMonthly: '',
+    nonLoanCosts: '',
+    bankRate: '7',
+    bankTermYears: '30',
+    downPaymentPct: '20',
+
+    // Step 3
+    sfRate: '8',
+    balloonTerm: '10',
+    sfDownPaymentPct: '20',
+    priceMode: 'match' // 'match' or 'maximize'
+  };
+
+  // Helper functions
+  function formatCurrency(value) {
+    if (value === null || value === undefined || isNaN(value)) return '$0';
+    return '$' + Math.round(value).toLocaleString();
+  }
+
+  function formatPercent(value) {
+    if (value === null || value === undefined || isNaN(value)) return '0%';
+    return value.toFixed(2) + '%';
+  }
+
+  function parseNumber(value) {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
+    return parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+  }
+
+  function calculateMonthlyPayment(principal, annualRate, years) {
+    if (principal <= 0 || annualRate <= 0 || years <= 0) return 0;
+    const monthlyRate = annualRate / 100 / 12;
+    const numPayments = years * 12;
+    const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+                    (Math.pow(1 + monthlyRate, numPayments) - 1);
+    return payment;
+  }
+
+  function calculateMaxLoanAmount(monthlyPayment, annualRate, years) {
+    if (monthlyPayment <= 0 || annualRate <= 0 || years <= 0) return 0;
+    const monthlyRate = annualRate / 100 / 12;
+    const numPayments = years * 12;
+    const loanAmount = monthlyPayment * (Math.pow(1 + monthlyRate, numPayments) - 1) /
+                       (monthlyRate * Math.pow(1 + monthlyRate, numPayments));
+    return loanAmount;
+  }
+
+  function calculateBankScenario() {
+    const targetPrice = parseNumber(state.targetSalePrice);
+    const mortgagePayoff = parseNumber(state.mortgagePayoff);
+    const sellingCostsPct = parseNumber(state.sellingCostsPct);
+    const taxRate = parseNumber(state.taxRateGain);
+
+    const buyerMaxMonthly = parseNumber(state.buyerMaxMonthly);
+    const nonLoanCosts = parseNumber(state.nonLoanCosts);
+    const bankRate = parseNumber(state.bankRate);
+    const bankTermYears = parseNumber(state.bankTermYears);
+    const downPaymentPct = parseNumber(state.downPaymentPct);
+
+    const maxLoanPayment = buyerMaxMonthly - nonLoanCosts;
+    const maxBankLoan = calculateMaxLoanAmount(maxLoanPayment, bankRate, bankTermYears);
+    const maxBankPrice = maxBankLoan / (1 - downPaymentPct / 100);
+
+    const bankLoanAmount = targetPrice * (1 - downPaymentPct / 100);
+    const bankMonthlyPayment = calculateMonthlyPayment(bankLoanAmount, bankRate, bankTermYears);
+    const bankTotalPayment = bankMonthlyPayment + nonLoanCosts;
+
+    const sellingCosts = targetPrice * (sellingCostsPct / 100);
+    const netProceeds = targetPrice - mortgagePayoff - sellingCosts;
+
+    let taxDue;
+    if (state.showAdvanced && state.taxBasis) {
+      const basis = parseNumber(state.taxBasis);
+      const depreciation = parseNumber(state.depreciationTaken);
+      const adjustedBasis = basis - depreciation;
+      const gain = targetPrice - adjustedBasis;
+      taxDue = Math.max(0, gain * (taxRate / 100));
+    } else {
+      const approximateGain = targetPrice * 0.25;
+      taxDue = approximateGain * (taxRate / 100);
+    }
+
+    const cashAfterTax = netProceeds - taxDue;
+
+    return {
+      maxLoanPayment,
+      maxBankLoan,
+      maxBankPrice,
+      bankMonthlyPayment,
+      bankTotalPayment,
+      canAfford: bankTotalPayment <= buyerMaxMonthly,
+      cashAfterTax,
+      taxDue,
+      sellingCosts,
+      targetPrice
+    };
+  }
+
+  function calculateSellerFinanceScenario() {
+    const bankScenario = calculateBankScenario();
+    const mortgagePayoff = parseNumber(state.mortgagePayoff);
+    const sfRate = parseNumber(state.sfRate);
+    const sfDownPaymentPct = parseNumber(state.sfDownPaymentPct);
+    const balloonTerm = parseNumber(state.balloonTerm);
+    const taxRate = parseNumber(state.taxRateGain);
+
+    let sfPrice;
+    if (state.priceMode === 'match') {
+      sfPrice = parseNumber(state.targetSalePrice);
+    } else {
+      // Maximize: SF loan payment = max loan payment
+      const maxLoanPayment = bankScenario.maxLoanPayment;
+      const sfLoanAmount = maxLoanPayment / ((sfRate / 100) / 12);
+      sfPrice = sfLoanAmount / (1 - sfDownPaymentPct / 100);
+    }
+
+    const sfDownPayment = sfPrice * (sfDownPaymentPct / 100);
+    const sfLoanAmount = sfPrice - sfDownPayment;
+    const sfMonthlyPayment = sfLoanAmount * ((sfRate / 100) / 12);
+    const sfBalloonBalance = sfLoanAmount;
+
+    const sfSellingCostsPct = state.showAdvanced && state.sfSellingCostsPct ?
+                              parseNumber(state.sfSellingCostsPct) :
+                              parseNumber(state.sellingCostsPct);
+    const sfSellingCosts = sfPrice * (sfSellingCostsPct / 100);
+
+    const sellerCashAtClosing = sfDownPayment - mortgagePayoff - sfSellingCosts;
+
+    // Installment sale tax - only on down payment portion
+    let taxDueAtClosing;
+    if (state.showAdvanced && state.taxBasis) {
+      const basis = parseNumber(state.taxBasis);
+      const depreciation = parseNumber(state.depreciationTaken);
+      const adjustedBasis = basis - depreciation;
+      const totalGain = sfPrice - adjustedBasis;
+      const gainRatio = totalGain / sfPrice;
+      const gainOnDownPayment = sfDownPayment * gainRatio;
+      taxDueAtClosing = Math.max(0, gainOnDownPayment * (taxRate / 100));
+    } else {
+      const approximateGain = sfPrice * 0.25;
+      const gainRatio = 0.25;
+      const gainOnDownPayment = sfDownPayment * gainRatio;
+      taxDueAtClosing = gainOnDownPayment * (taxRate / 100);
+    }
+
+    const netCashAtClosing = sellerCashAtClosing - taxDueAtClosing;
+
+    // Total received over balloon term (ignoring future tax on balloon)
+    const totalMonthlyPayments = sfMonthlyPayment * balloonTerm * 12;
+    const totalReceived = netCashAtClosing + totalMonthlyPayments + sfBalloonBalance;
+
+    const extraProfit = totalReceived - bankScenario.cashAfterTax;
+
+    return {
+      sfPrice,
+      sfDownPayment,
+      sfLoanAmount,
+      sfMonthlyPayment,
+      sfBalloonBalance,
+      sfSellingCosts,
+      sellerCashAtClosing,
+      taxDueAtClosing,
+      netCashAtClosing,
+      totalReceived,
+      extraProfit
+    };
+  }
+
+  // Render functions
+  function renderStep1() {
+    const warnings = [];
+
+    return `
+      <div class="btb-calculator__header">
+        <h2 class="btb-calculator__title">About Your Property</h2>
+        <p class="btb-calculator__subtitle">Let's start with the basics of your sale</p>
+      </div>
+
+      ${warnings.map(w => `<div class="btb-calculator__warning">${w}</div>`).join('')}
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Target Sale Price
+          <span class="btb-calculator__helper">What you'd like to sell for</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.targetSalePrice}"
+          data-field="targetSalePrice"
+          placeholder="$500,000"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Underlying Mortgage Payoff
+          <span class="btb-calculator__helper">Amount owed on your current mortgage</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.mortgagePayoff}"
+          data-field="mortgagePayoff"
+          placeholder="$200,000"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Estimated Selling Costs (%)
+          <span class="btb-calculator__helper">Agent commissions, closing costs, etc.</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.sellingCostsPct}"
+          data-field="sellingCostsPct"
+          placeholder="6"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Tax Rate on Gain (%)
+          <span class="btb-calculator__helper">Your estimated capital gains tax rate</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.taxRateGain}"
+          data-field="taxRateGain"
+          placeholder="15"
+        />
+      </div>
+
+      <button class="btb-calculator__toggle" data-action="toggleAdvanced">
+        ${state.showAdvanced ? '▼' : '▶'} Advanced Options
+      </button>
+
+      ${state.showAdvanced ? `
+        <div class="btb-calculator__advanced-fields">
+          <div class="btb-calculator__form-group">
+            <label class="btb-calculator__label">
+              Tax Basis
+              <span class="btb-calculator__helper">Original purchase price + improvements</span>
+            </label>
+            <input
+              type="text"
+              class="btb-calculator__input"
+              value="${state.taxBasis}"
+              data-field="taxBasis"
+              placeholder="$300,000"
+            />
+          </div>
+
+          <div class="btb-calculator__form-group">
+            <label class="btb-calculator__label">
+              Depreciation Taken
+              <span class="btb-calculator__helper">Total depreciation deducted over ownership</span>
+            </label>
+            <input
+              type="text"
+              class="btb-calculator__input"
+              value="${state.depreciationTaken}"
+              data-field="depreciationTaken"
+              placeholder="$50,000"
+            />
+          </div>
+
+          <div class="btb-calculator__form-group">
+            <label class="btb-calculator__label">
+              Seller-Financing Selling Costs (%)
+              <span class="btb-calculator__helper">Lower costs when seller financing (no agent needed)</span>
+            </label>
+            <input
+              type="text"
+              class="btb-calculator__input"
+              value="${state.sfSellingCostsPct}"
+              data-field="sfSellingCostsPct"
+              placeholder="2"
+            />
+          </div>
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function renderStep2() {
+    const warnings = [];
+    let bankScenario = null;
+
+    if (state.buyerMaxMonthly && state.targetSalePrice) {
+      bankScenario = calculateBankScenario();
+      if (!bankScenario.canAfford) {
+        warnings.push(`Warning: At your target price, the buyer's monthly payment would be ${formatCurrency(bankScenario.bankTotalPayment)}, which exceeds their max of ${formatCurrency(parseNumber(state.buyerMaxMonthly))}. The maximum price they can afford with traditional financing is approximately ${formatCurrency(bankScenario.maxBankPrice)}.`);
+      }
+    }
+
+    return `
+      <div class="btb-calculator__header">
+        <h2 class="btb-calculator__title">Buyer Capacity</h2>
+        <p class="btb-calculator__subtitle">What can your buyer afford?</p>
+      </div>
+
+      ${warnings.map(w => `<div class="btb-calculator__error">${w}</div>`).join('')}
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Buyer's Max Monthly Housing Payment
+          <span class="btb-calculator__helper">Total housing budget (includes loan + other costs)</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.buyerMaxMonthly}"
+          data-field="buyerMaxMonthly"
+          placeholder="$3,500"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Estimated Non-Loan Costs
+          <span class="btb-calculator__helper">Property tax, insurance, HOA, etc. per month</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.nonLoanCosts}"
+          data-field="nonLoanCosts"
+          placeholder="$500"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Bank Interest Rate (%)
+          <span class="btb-calculator__helper">Current market rate for traditional mortgage</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.bankRate}"
+          data-field="bankRate"
+          placeholder="7"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Bank Loan Term (Years)
+          <span class="btb-calculator__helper">Typical mortgage term</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.bankTermYears}"
+          data-field="bankTermYears"
+          placeholder="30"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Down Payment (%)
+          <span class="btb-calculator__helper">Required down payment for traditional loan</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.downPaymentPct}"
+          data-field="downPaymentPct"
+          placeholder="20"
+        />
+      </div>
+
+      ${bankScenario ? `
+        <div style="margin-top: 24px; padding: 16px; background: #f5f5f5; border-radius: 6px;">
+          <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #333;">Quick Summary</p>
+          <p style="margin: 0 0 4px 0; font-size: 13px; color: #666;">Max loan payment available: ${formatCurrency(bankScenario.maxLoanPayment)}</p>
+          <p style="margin: 0 0 4px 0; font-size: 13px; color: #666;">Max traditional loan amount: ${formatCurrency(bankScenario.maxBankLoan)}</p>
+          <p style="margin: 0; font-size: 13px; color: #666;">Max affordable price: ${formatCurrency(bankScenario.maxBankPrice)}</p>
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function renderStep3() {
+    const warnings = [];
+    const bankScenario = calculateBankScenario();
+    const sfScenario = calculateSellerFinanceScenario();
+
+    return `
+      <div class="btb-calculator__header">
+        <h2 class="btb-calculator__title">Seller Financing Comparison</h2>
+        <p class="btb-calculator__subtitle">See how becoming the bank changes everything</p>
+      </div>
+
+      ${warnings.map(w => `<div class="btb-calculator__warning">${w}</div>`).join('')}
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Seller-Financed Interest Rate (%)
+          <span class="btb-calculator__helper">Your rate (typically higher than bank rate)</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.sfRate}"
+          data-field="sfRate"
+          placeholder="8"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Balloon Term (Years)
+          <span class="btb-calculator__helper">When the remaining balance is due</span>
+        </label>
+        <select
+          class="btb-calculator__select"
+          data-field="balloonTerm"
+        >
+          <option value="5" ${state.balloonTerm === '5' ? 'selected' : ''}>5 years</option>
+          <option value="7" ${state.balloonTerm === '7' ? 'selected' : ''}>7 years</option>
+          <option value="10" ${state.balloonTerm === '10' ? 'selected' : ''}>10 years</option>
+        </select>
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">
+          Required Down Payment (%)
+          <span class="btb-calculator__helper">Down payment for your seller-financed deal</span>
+        </label>
+        <input
+          type="text"
+          class="btb-calculator__input"
+          value="${state.sfDownPaymentPct}"
+          data-field="sfDownPaymentPct"
+          placeholder="20"
+        />
+      </div>
+
+      <div class="btb-calculator__form-group">
+        <label class="btb-calculator__label">Price Strategy</label>
+        <div class="btb-calculator__radio-group">
+          <label class="btb-calculator__radio-label">
+            <input
+              type="radio"
+              name="priceMode"
+              value="match"
+              ${state.priceMode === 'match' ? 'checked' : ''}
+              data-field="priceMode"
+            />
+            Match traditional price
+          </label>
+          <label class="btb-calculator__radio-label">
+            <input
+              type="radio"
+              name="priceMode"
+              value="maximize"
+              ${state.priceMode === 'maximize' ? 'checked' : ''}
+              data-field="priceMode"
+            />
+            Maximize based on buyer payment
+          </label>
+        </div>
+      </div>
+
+      <div style="height: 32px;"></div>
+
+      <div class="btb-calculator__comparison">
+        <div class="btb-calculator__comparison-card">
+          <h3 class="btb-calculator__comparison-title">Traditional Sale</h3>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Sale Price</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.targetPrice)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Selling Costs</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.sellingCosts)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Tax Due</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.taxDue)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Cash After Tax</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.cashAfterTax)}</span>
+          </div>
+        </div>
+
+        <div class="btb-calculator__comparison-card btb-calculator__comparison-card--highlight">
+          <h3 class="btb-calculator__comparison-title">Seller Financing</h3>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Sale Price</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfPrice)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Down Payment</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfDownPayment)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Monthly Payment</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfMonthlyPayment)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Balloon (${state.balloonTerm}yr)</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfBalloonBalance)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Net Cash at Closing</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.netCashAtClosing)}</span>
+          </div>
+          <div class="btb-calculator__comparison-row">
+            <span class="btb-calculator__comparison-label">Total Received</span>
+            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.totalReceived)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="btb-calculator__highlight">
+        <p class="btb-calculator__highlight-title">Becoming the bank could bring you approximately</p>
+        <p class="btb-calculator__highlight-value">${formatCurrency(sfScenario.extraProfit)} more</p>
+      </div>
+
+      <div class="btb-calculator__details">
+        <button class="btb-calculator__details-toggle" data-action="toggleDetails">
+          Show details
+          <span>▼</span>
+        </button>
+        <div class="btb-calculator__details-content" style="display: none;">
+          <p><strong>Tax Calculation:</strong></p>
+          ${state.showAdvanced && state.taxBasis ? `
+            <p>Adjusted Basis: ${formatCurrency(parseNumber(state.taxBasis) - parseNumber(state.depreciationTaken))}<br/>
+            Seller Financing uses installment sale method, deferring tax on the financed portion until balloon payment.</p>
+          ` : `
+            <p>Simple mode: Assumes gain = 25% of sale price. Enable Advanced Options in Step 1 for precise basis/depreciation calculations.</p>
+          `}
+
+          <p><strong>Payment Structure:</strong></p>
+          <p>Seller financing uses interest-only payments with a balloon. This keeps the buyer's monthly payment lower (${formatCurrency(sfScenario.sfMonthlyPayment)}) compared to a traditional amortizing loan.</p>
+
+          <p><strong>Total Received Calculation:</strong></p>
+          <p>Net cash at closing (${formatCurrency(sfScenario.netCashAtClosing)}) + Monthly payments over ${state.balloonTerm} years (${formatCurrency(sfScenario.sfMonthlyPayment * parseNumber(state.balloonTerm) * 12)}) + Balloon payment (${formatCurrency(sfScenario.sfBalloonBalance)}).</p>
+
+          <p><strong>Risk Considerations:</strong></p>
+          <p>This calculation assumes the buyer makes all payments and pays the balloon on time. Consider buyer creditworthiness, property as collateral, and potential default scenarios. Consult with a tax advisor and real estate attorney before proceeding.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function render() {
+    const container = document.getElementById('become-the-bank-calculator');
+    if (!container) return;
+
+    let stepContent = '';
+    if (state.currentStep === 1) stepContent = renderStep1();
+    else if (state.currentStep === 2) stepContent = renderStep2();
+    else if (state.currentStep === 3) stepContent = renderStep3();
+
+    container.innerHTML = `
+      <div class="btb-calculator">
+        <div class="btb-calculator__card">
+          <div class="btb-calculator__step-indicator">
+            <div class="btb-calculator__step-dot ${state.currentStep >= 1 ? 'btb-calculator__step-dot--active' : ''}"></div>
+            <div class="btb-calculator__step-dot ${state.currentStep >= 2 ? 'btb-calculator__step-dot--active' : ''}"></div>
+            <div class="btb-calculator__step-dot ${state.currentStep >= 3 ? 'btb-calculator__step-dot--active' : ''}"></div>
+          </div>
+
+          ${stepContent}
+
+          <div class="btb-calculator__buttons">
+            ${state.currentStep > 1 ? `
+              <button class="btb-calculator__button btb-calculator__button--secondary" data-action="back">
+                Back
+              </button>
+            ` : ''}
+            ${state.currentStep < 3 ? `
+              <button class="btb-calculator__button btb-calculator__button--primary" data-action="next">
+                Next
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+
+    attachEventListeners();
+  }
+
+  function attachEventListeners() {
+    const container = document.getElementById('become-the-bank-calculator');
+    if (!container) return;
+
+    // Input fields
+    container.querySelectorAll('input[data-field], select[data-field]').forEach(input => {
+      const field = input.getAttribute('data-field');
+
+      if (input.type === 'radio') {
+        input.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            state[field] = e.target.value;
+            render();
+          }
+        });
+      } else {
+        input.addEventListener('input', (e) => {
+          state[field] = e.target.value;
+          // Re-render on blur for calculations, but update state immediately
+        });
+
+        input.addEventListener('blur', () => {
+          render();
+        });
+      }
+    });
+
+    // Action buttons
+    container.querySelectorAll('[data-action]').forEach(button => {
+      const action = button.getAttribute('data-action');
+
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if (action === 'next') {
+          state.currentStep = Math.min(3, state.currentStep + 1);
+          render();
+        } else if (action === 'back') {
+          state.currentStep = Math.max(1, state.currentStep - 1);
+          render();
+        } else if (action === 'toggleAdvanced') {
+          state.showAdvanced = !state.showAdvanced;
+          render();
+        } else if (action === 'toggleDetails') {
+          const content = button.nextElementSibling;
+          const icon = button.querySelector('span');
+          if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.textContent = '▲';
+            button.childNodes[0].textContent = 'Hide details ';
+          } else {
+            content.style.display = 'none';
+            icon.textContent = '▼';
+            button.childNodes[0].textContent = 'Show details ';
+          }
+        }
+      });
+    });
+  }
+
+  // Initialize
+  render();
+})();
+</script>
+
+</body>
+</html>
