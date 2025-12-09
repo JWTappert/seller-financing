@@ -11,6 +11,13 @@
 <div id="become-the-bank-calculator"></div>
 
 <style>
+body {
+  background-color: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+}
+
 .btb-calculator {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   max-width: 800px;
@@ -348,6 +355,169 @@
   .btb-calculator__highlight-value {
     font-size: 28px;
   }
+  .btb-calculator__highlight-value {
+    font-size: 28px;
+  }
+
+  .btb-calculator__comparison-table th, 
+  .btb-calculator__comparison-table td {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+/* New Table Styles */
+.btb-calculator__comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.btb-calculator__comparison-table th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid #e8e8e8;
+  color: #666;
+  font-weight: 600;
+}
+
+.btb-calculator__comparison-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e8e8e8;
+  color: #333;
+}
+
+.btb-calculator__comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.btb-calculator__comparison-table .diff-positive {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.btb-calculator__comparison-table .diff-negative {
+  color: #cf1322;
+  font-weight: 600;
+}
+
+.btb-calculator__comparison-table .highlight-row {
+  background-color: #f6ffed;
+}
+
+.btb-calculator__details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.btb-calculator__details-list li {
+  margin-bottom: 12px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.btb-calculator__details-list li::before {
+  content: "•";
+  position: absolute;
+  left: 8px;
+  color: #4a90e2;
+  font-weight: bold;
+}
+
+.btb-calculator__details-list strong {
+  color: #333;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Grid Layout for Step 3 */
+.btb-calculator__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .btb-calculator__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .btb-calculator__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Tooltip Styles */
+.btb-calculator__tooltip {
+  position: relative;
+  display: inline-flex; /* improved alignment */
+  align-items: center;
+  cursor: help;
+  /* border-bottom: 1px dashed #999; REMOVED */
+}
+
+/* New Info Icon Style */
+.btb-calculator__info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background-color: #e0e0e0;
+  color: #555;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 6px;
+  transition: all 0.2s;
+}
+
+.btb-calculator__tooltip:hover .btb-calculator__info-icon {
+  background-color: #ccc;
+  color: #333;
+}
+
+.btb-calculator__tooltip .tooltip-text {
+  visibility: hidden;
+  width: 280px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 12px;
+  position: absolute;
+  z-index: 10;
+  bottom: 140%; /* Moved up slightly */
+  left: 50%;
+  transform: translateX(-20%);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none; /* Prevention of flickering */
+}
+
+.btb-calculator__tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 20%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.btb-calculator__tooltip:focus-within .tooltip-text,
+.btb-calculator__tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 </style>
 
@@ -380,10 +550,9 @@
     sfRate: '8',
     balloonTerm: '10',
     sfDownPaymentPct: '20',
-    priceMode: 'match' // 'match' or 'maximize'
+    priceMode: 'match', // 'match' or 'maximize'
+    opportunityCostRate: '7' // New: for calculating alternative investment returns
   };
-
-  // Helper functions
   function formatCurrency(value) {
     if (value === null || value === undefined || isNaN(value)) return '$0';
     return '$' + Math.round(value).toLocaleString();
@@ -398,6 +567,22 @@
     if (typeof value === 'number') return value;
     if (!value) return 0;
     return parseFloat(value.toString().replace(/[^0-9.-]/g, '')) || 0;
+  }
+
+  /**
+   * Calculates the amortization schedule for a loan.
+   * @param {number} principal - Loan amount
+   * @param {number} annualRate - Annual interest rate (percentage)
+   * @param {number} totalPayments - Total number of monthly payments
+   * @returns {Object} Amortization details including monthly payment and total interest
+   */
+  function calculateAmortizationSchedule(principal, annualRate, totalPayments) {
+    if (principal <= 0 || annualRate <= 0 || totalPayments <= 0) return 0;
+    const monthlyRate = annualRate / 100 / 12;
+    const numPayments = totalPayments * 12;
+    const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+                    (Math.pow(1 + monthlyRate, numPayments) - 1);
+    return payment;
   }
 
   function calculateMonthlyPayment(principal, annualRate, years) {
@@ -469,6 +654,12 @@
     };
   }
 
+  /**
+   * Calculates the financial scenario for Seller Financing.
+   * Includes profit comparison and opportunity cost analysis.
+   * @param {Object} bankScenario - Result of the traditional bank sale scenario
+   * @returns {Object} Seller financing metrics and comparison data
+   */
   function calculateSellerFinanceScenario() {
     const bankScenario = calculateBankScenario();
     const mortgagePayoff = parseNumber(state.mortgagePayoff);
@@ -524,6 +715,16 @@
 
     const extraProfit = totalReceived - bankScenario.cashAfterTax;
 
+    // Opportunity Cost Calculation
+    const opportunityRate = parseNumber(state.opportunityCostRate);
+    const years = parseNumber(state.balloonTerm);
+    // Future Value of Traditional Cash After Tax: FV = PV * (1 + r)^n
+    const traditionalInvestedFV = bankScenario.cashAfterTax * Math.pow(1 + opportunityRate / 100, years);
+    const traditionalGrowth = traditionalInvestedFV - bankScenario.cashAfterTax;
+    
+    // Compare Total Nominal SF Received vs Traditional Invested FV
+    const sfVsInvestedDiff = totalReceived - traditionalInvestedFV;
+
     return {
       sfPrice,
       sfDownPayment,
@@ -535,7 +736,11 @@
       taxDueAtClosing,
       netCashAtClosing,
       totalReceived,
-      extraProfit
+      extraProfit,
+      // New return values
+      traditionalInvestedFV,
+      traditionalGrowth,
+      sfVsInvestedDiff
     };
   }
 
@@ -772,47 +977,65 @@
 
       ${warnings.map(w => `<div class="btb-calculator__warning">${w}</div>`).join('')}
 
-      <div class="btb-calculator__form-group">
-        <label class="btb-calculator__label">
-          Seller-Financed Interest Rate (%)
-          <span class="btb-calculator__helper">Your rate (typically higher than bank rate)</span>
-        </label>
-        <input
-          type="text"
-          class="btb-calculator__input"
-          value="${state.sfRate}"
-          data-field="sfRate"
-          placeholder="8"
-        />
-      </div>
+      ${warnings.map(w => `<div class="btb-calculator__warning">${w}</div>`).join('')}
 
-      <div class="btb-calculator__form-group">
-        <label class="btb-calculator__label">
-          Balloon Term (Years)
-          <span class="btb-calculator__helper">When the remaining balance is due</span>
-        </label>
-        <select
-          class="btb-calculator__select"
-          data-field="balloonTerm"
-        >
-          <option value="5" ${state.balloonTerm === '5' ? 'selected' : ''}>5 years</option>
-          <option value="7" ${state.balloonTerm === '7' ? 'selected' : ''}>7 years</option>
-          <option value="10" ${state.balloonTerm === '10' ? 'selected' : ''}>10 years</option>
-        </select>
-      </div>
+      <div class="btb-calculator__grid">
+        <div class="btb-calculator__form-group" style="margin-bottom: 0;">
+          <label class="btb-calculator__label">
+            Seller-Financed Interest Rate (%)
+            <span class="btb-calculator__helper">Your rate (typically higher than bank rate)</span>
+          </label>
+          <input
+            type="text"
+            class="btb-calculator__input"
+            value="${state.sfRate}"
+            data-field="sfRate"
+            placeholder="8"
+          />
+        </div>
 
-      <div class="btb-calculator__form-group">
-        <label class="btb-calculator__label">
-          Required Down Payment (%)
-          <span class="btb-calculator__helper">Down payment for your seller-financed deal</span>
-        </label>
-        <input
-          type="text"
-          class="btb-calculator__input"
-          value="${state.sfDownPaymentPct}"
-          data-field="sfDownPaymentPct"
-          placeholder="20"
-        />
+        <div class="btb-calculator__form-group" style="margin-bottom: 0;">
+          <label class="btb-calculator__label">
+            Balloon Term (Years)
+            <span class="btb-calculator__helper">When the remaining balance is due</span>
+          </label>
+          <select
+            class="btb-calculator__select"
+            data-field="balloonTerm"
+          >
+            <option value="5" ${state.balloonTerm === '5' ? 'selected' : ''}>5 years</option>
+            <option value="7" ${state.balloonTerm === '7' ? 'selected' : ''}>7 years</option>
+            <option value="10" ${state.balloonTerm === '10' ? 'selected' : ''}>10 years</option>
+          </select>
+        </div>
+
+        <div class="btb-calculator__form-group" style="margin-bottom: 0;">
+          <label class="btb-calculator__label">
+            Required Down Payment (%)
+            <span class="btb-calculator__helper">Down payment for your seller-financed deal</span>
+          </label>
+          <input
+            type="text"
+            class="btb-calculator__input"
+            value="${state.sfDownPaymentPct}"
+            data-field="sfDownPaymentPct"
+            placeholder="20"
+          />
+        </div>
+
+        <div class="btb-calculator__form-group" style="margin-bottom: 0;">
+          <label class="btb-calculator__label">
+            Alternative Investment Return (%)
+            <span class="btb-calculator__helper">What if you invested your traditional sale proceeds?</span>
+          </label>
+          <input
+            type="text"
+            class="btb-calculator__input"
+            value="${state.opportunityCostRate}"
+            data-field="opportunityCostRate"
+            placeholder="7"
+          />
+        </div>
       </div>
 
       <div class="btb-calculator__form-group">
@@ -841,85 +1064,89 @@
         </div>
       </div>
 
-      <div style="height: 32px;"></div>
-
-      <div class="btb-calculator__comparison">
-        <div class="btb-calculator__comparison-card">
-          <h3 class="btb-calculator__comparison-title">Traditional Sale</h3>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Sale Price</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.targetPrice)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Selling Costs</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.sellingCosts)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Tax Due</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.taxDue)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Cash After Tax</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(bankScenario.cashAfterTax)}</span>
-          </div>
-        </div>
-
-        <div class="btb-calculator__comparison-card btb-calculator__comparison-card--highlight">
-          <h3 class="btb-calculator__comparison-title">Seller Financing</h3>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Sale Price</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfPrice)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Down Payment</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfDownPayment)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Monthly Payment</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfMonthlyPayment)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Balloon (${state.balloonTerm}yr)</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.sfBalloonBalance)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Net Cash at Closing</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.netCashAtClosing)}</span>
-          </div>
-          <div class="btb-calculator__comparison-row">
-            <span class="btb-calculator__comparison-label">Total Received</span>
-            <span class="btb-calculator__comparison-value">${formatCurrency(sfScenario.totalReceived)}</span>
-          </div>
-        </div>
-      </div>
+      <table class="btb-calculator__comparison-table" style="margin-top: 24px;">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Traditional Sale</th>
+            <th>Seller Financing</th>
+            <th>Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sale Price</td>
+            <td>${formatCurrency(bankScenario.targetPrice)}</td>
+            <td>${formatCurrency(sfScenario.sfPrice)}</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>Net Cash at Closing</td>
+            <td>${formatCurrency(bankScenario.cashAfterTax)}</td>
+            <td>${formatCurrency(sfScenario.netCashAtClosing)}</td>
+            <td>
+              <span class="${sfScenario.netCashAtClosing >= bankScenario.cashAfterTax ? 'diff-positive' : 'diff-negative'}">
+                ${sfScenario.netCashAtClosing >= bankScenario.cashAfterTax ? '+' : ''}${formatCurrency(sfScenario.netCashAtClosing - bankScenario.cashAfterTax)}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>Monthly Income</td>
+            <td>$0</td>
+            <td>${formatCurrency(sfScenario.sfMonthlyPayment)}</td>
+            <td class="diff-positive">+${formatCurrency(sfScenario.sfMonthlyPayment)}</td>
+          </tr>
+           <tr class="highlight-row">
+            <td>
+              <span class="btb-calculator__tooltip" tabindex="0" aria-describedby="tooltip-desc">
+                <strong>Total 10y Value</strong>
+                <span class="btb-calculator__info-icon" aria-hidden="true">?</span>
+                <span id="tooltip-desc" class="tooltip-text" role="tooltip">
+                  <strong>Traditional:</strong> Net Proceeds invested at ${formatPercent(parseNumber(state.opportunityCostRate))} for ${state.balloonTerm} years.<br><br>
+                  <strong>Seller Financing:</strong> Sum of all nominal dollars received (Down Payment + Monthly Payments + Balloon). No reinvestment assumed.
+                </span>
+              </span>
+            </td>
+            <td>${formatCurrency(sfScenario.traditionalInvestedFV)}</td>
+            <td><strong>${formatCurrency(sfScenario.totalReceived)}</strong></td>
+            <td>
+              <span class="${sfScenario.sfVsInvestedDiff >= 0 ? 'diff-positive' : 'diff-negative'}">
+                ${sfScenario.sfVsInvestedDiff >= 0 ? '+' : ''}${formatCurrency(sfScenario.sfVsInvestedDiff)}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="btb-calculator__highlight">
         <p class="btb-calculator__highlight-title">Becoming the bank could bring you approximately</p>
-        <p class="btb-calculator__highlight-value">${formatCurrency(sfScenario.extraProfit)} more</p>
+        <p class="btb-calculator__highlight-value">${formatCurrency(sfScenario.sfVsInvestedDiff)} ${sfScenario.sfVsInvestedDiff >= 0 ? 'more' : 'less'}</p>
       </div>
 
       <div class="btb-calculator__details">
         <button class="btb-calculator__details-toggle" data-action="toggleDetails">
-          Show details
+          Explanation & Risks
           <span>▼</span>
         </button>
         <div class="btb-calculator__details-content" style="display: none;">
-          <p><strong>Tax Calculation:</strong></p>
-          ${state.showAdvanced && state.taxBasis ? `
-            <p>Adjusted Basis: ${formatCurrency(parseNumber(state.taxBasis) - parseNumber(state.depreciationTaken))}<br/>
-            Seller Financing uses installment sale method, deferring tax on the financed portion until balloon payment.</p>
-          ` : `
-            <p>Simple mode: Assumes gain = 25% of sale price. Enable Advanced Options in Step 1 for precise basis/depreciation calculations.</p>
-          `}
-
-          <p><strong>Payment Structure:</strong></p>
-          <p>Seller financing uses interest-only payments with a balloon. This keeps the buyer's monthly payment lower (${formatCurrency(sfScenario.sfMonthlyPayment)}) compared to a traditional amortizing loan.</p>
-
-          <p><strong>Total Received Calculation:</strong></p>
-          <p>Net cash at closing (${formatCurrency(sfScenario.netCashAtClosing)}) + Monthly payments over ${state.balloonTerm} years (${formatCurrency(sfScenario.sfMonthlyPayment * parseNumber(state.balloonTerm) * 12)}) + Balloon payment (${formatCurrency(sfScenario.sfBalloonBalance)}).</p>
-
-          <p><strong>Risk Considerations:</strong></p>
-          <p>This calculation assumes the buyer makes all payments and pays the balloon on time. Consider buyer creditworthiness, property as collateral, and potential default scenarios. Consult with a tax advisor and real estate attorney before proceeding.</p>
+          <ul class="btb-calculator__details-list">
+            <li>
+              <strong>Tax Advantage</strong>
+              SF uses the Installment Sale method. You only pay tax on the principal portion of payments received in a given year, deferring a large chunk of tax until the balloon payment.
+            </li>
+            <li>
+              <strong>Payment Structure</strong>
+              We modeled this as Interest-Only payments to maximize cash flow and keep the buyer's payment lower, with the full principal due as a balloon in ${state.balloonTerm} years.
+            </li>
+            <li>
+              <strong>Opportunity Cost</strong>
+              We compared the total SF payments against investing your Traditional Sale "Cash After Tax" at ${formatPercent(parseNumber(state.opportunityCostRate))} compounded annually.
+            </li>
+            <li>
+              <strong>Risks</strong>
+              Requires buyer creditworthiness. If they default, you may need to foreclose. Always consult a real estate attorney and CPA.
+            </li>
+          </ul>
         </div>
       </div>
     `;
