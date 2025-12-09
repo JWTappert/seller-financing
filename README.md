@@ -10,7 +10,7 @@ A fully self-contained 3-step wizard calculator for comparing traditional proper
 
 ## Live Demo
 
-Visit the live calculator at: [GitHub Pages URL will be here]
+Visit the live calculator at: [here](https://jwtappert.github.io/seller-financing/)
 
 ## For Webflow Integration
 
