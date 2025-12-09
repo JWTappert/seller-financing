@@ -1212,7 +1212,12 @@ body {
           // Re-render on blur for calculations, but update state immediately
         });
 
-        input.addEventListener('blur', () => {
+        input.addEventListener('blur', (e) => {
+          // Fix: Prevent re-render if user clicks a navigation button (which handles render itself)
+          // This avoids the issue where the button is destroyed before the click registers
+          if (e.relatedTarget && e.relatedTarget.hasAttribute('data-action')) {
+            return;
+          }
           render();
         });
       }
