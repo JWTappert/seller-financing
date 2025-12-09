@@ -1156,37 +1156,57 @@ body {
     const container = document.getElementById('become-the-bank-calculator');
     if (!container) return;
 
-    let stepContent = '';
-    if (state.currentStep === 1) stepContent = renderStep1();
-    else if (state.currentStep === 2) stepContent = renderStep2();
-    else if (state.currentStep === 3) stepContent = renderStep3();
+    // 1. Initialize Shell (First Render Only)
+    let calculatorShell = container.querySelector('.btb-calculator');
+    if (!calculatorShell) {
+      container.innerHTML = `
+        <div class="btb-calculator">
+          <div class="btb-calculator__card">
+            <div class="btb-calculator__step-indicator">
+              <div class="btb-calculator__step-dot" data-step="1"></div>
+              <div class="btb-calculator__step-dot" data-step="2"></div>
+              <div class="btb-calculator__step-dot" data-step="3"></div>
+            </div>
 
-    container.innerHTML = `
-      <div class="btb-calculator">
-        <div class="btb-calculator__card">
-          <div class="btb-calculator__step-indicator">
-            <div class="btb-calculator__step-dot ${state.currentStep >= 1 ? 'btb-calculator__step-dot--active' : ''}"></div>
-            <div class="btb-calculator__step-dot ${state.currentStep >= 2 ? 'btb-calculator__step-dot--active' : ''}"></div>
-            <div class="btb-calculator__step-dot ${state.currentStep >= 3 ? 'btb-calculator__step-dot--active' : ''}"></div>
-          </div>
+            <div id="btb-step-content"></div>
 
-          ${stepContent}
-
-          <div class="btb-calculator__buttons">
-            ${state.currentStep > 1 ? `
-              <button class="btb-calculator__button btb-calculator__button--secondary" data-action="back">
-                Back
-              </button>
-            ` : ''}
-            ${state.currentStep < 3 ? `
-              <button class="btb-calculator__button btb-calculator__button--primary" data-action="next">
-                Next
-              </button>
-            ` : ''}
+            <div class="btb-calculator__buttons"></div>
           </div>
         </div>
-      </div>
+      `;
+      calculatorShell = container.querySelector('.btb-calculator');
+    }
+
+    // 2. Update Content
+    const contentDiv = container.querySelector('#btb-step-content');
+    if (state.currentStep === 1) contentDiv.innerHTML = renderStep1();
+    else if (state.currentStep === 2) contentDiv.innerHTML = renderStep2();
+    else if (state.currentStep === 3) contentDiv.innerHTML = renderStep3();
+
+    // 3. Update Buttons
+    const buttonsDiv = container.querySelector('.btb-calculator__buttons');
+    buttonsDiv.innerHTML = `
+      ${state.currentStep > 1 ? `
+        <button class="btb-calculator__button btb-calculator__button--secondary" data-action="back">
+          Back
+        </button>
+      ` : ''}
+      ${state.currentStep < 3 ? `
+        <button class="btb-calculator__button btb-calculator__button--primary" data-action="next">
+          Next
+        </button>
+      ` : ''}
     `;
+
+    // 4. Update Steps Indicator
+    container.querySelectorAll('.btb-calculator__step-dot').forEach(dot => {
+      const step = parseInt(dot.getAttribute('data-step'));
+      if (state.currentStep >= step) {
+        dot.classList.add('btb-calculator__step-dot--active');
+      } else {
+        dot.classList.remove('btb-calculator__step-dot--active');
+      }
+    });
 
     attachEventListeners();
   }
